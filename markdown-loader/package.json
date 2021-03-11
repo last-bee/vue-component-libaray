@@ -1,0 +1,21 @@
+{
+  "name": "markdown-loader",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "cheerio": "^1.0.0-rc.5",
+    "highlight.js": "^10.6.0",
+    "loader-runner": "^4.2.0",
+    "markdown-it": "^12.0.4"
+  },
+  "devDependencies": {
+    "loader-utils": "^2.0.0"
+  }
+}
