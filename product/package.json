@@ -1,0 +1,45 @@
+{
+  "name": "@hhm1999/vue-components-mobile",
+  "main": "dist/vue-components-mobile.umd.min.js",
+  "version": "0.2.8",
+  "files": [
+    "dist/*"
+  ],
+  "private": false,
+  "scripts": {
+    "serve": "vue-cli-service serve",
+    "build": "vue-cli-service build --target lib --name vue-components-mobile ./src/components/index.js",
+    "build-doc": "vue-cli-service build --dest doc --no-clean",
+    "lint": "vue-cli-service lint"
+  },
+  "dependencies": {
+    "@antv/f2": "^3.3.4",
+    "axios": "^0.18.0",
+    "fine-uploader": "^5.16.2",
+    "signature_pad": "^3.0.0-beta.3",
+    "vant": "^1.5.0",
+    "vue": "^2.5.17",
+    "vue-resource": "^1.5.1",
+    "vue-router": "^3.0.1",
+    "vuex": "^3.0.1"
+  },
+  "devDependencies": {
+    "@hhm1999/vue-markdown-doc-loader": "^0.2.3",
+    "@vue/cli-plugin-babel": "^3.1.0",
+    "@vue/cli-service": "^3.1.0",
+    "mockjs": "^1.0.1-beta3",
+    "node-sass": "^4.11.0",
+    "sass-loader": "^7.1.0",
+    "vue-template-compiler": "^2.5.17"
+  },
+  "postcss": {
+    "plugins": {
+      "autoprefixer": {}
+    }
+  },
+  "browserslist": [
+    "> 1%",
+    "last 2 versions",
+    "not ie <= 8"
+  ]
+}

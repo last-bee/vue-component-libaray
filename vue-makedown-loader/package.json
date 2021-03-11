@@ -1,0 +1,36 @@
+{
+  "name": "@hhm1999/vue-markdown-doc-loader",
+  "version": "0.2.3",
+  "description": "markdown file to vue component loader.",
+  "main": "lib/index.js",
+  "files": [
+    "lib"
+  ],
+  "scripts": {
+    "dev": "cd example && webpack-dev-server --inline --hot --port 1998 --open"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.1.5",
+    "@babel/preset-env": "^7.1.5",
+    "babel-loader": "^8.0.4",
+    "css-loader": "^1.0.1",
+    "node-sass": "^4.10.0",
+    "sass-loader": "^7.1.0",
+    "url-loader": "^1.1.2",
+    "vue": "^2.5.17",
+    "vue-loader": "^15.4.2",
+    "vue-style-loader": "^4.1.2",
+    "vue-template-compiler": "^2.5.17",
+    "webpack": "^4.25.1",
+    "webpack-cli": "^3.1.2",
+    "webpack-dev-server": "^3.1.10",
+    "postcss-loader": "^3.0.0"
+  },
+  "dependencies": {
+    "cheerio": "^1.0.0-rc.2",
+    "highlight.js": "^9.13.1",
+    "loader-utils": "^1.1.0",
+    "markdown-it": "^8.4.2",
+    "markdown-it-anchor": "^5.0.2"
+  }
+}
