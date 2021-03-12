@@ -1,66 +1,119 @@
-const loaderUtils = require('loader-utils')
-const hljs = require('highlight.js')
-const cheerio = require('cheerio')
-module.exports = function(source) {
-    console.log(source)
-    console.log(loaderUtils.getOptions(this))
-
-    const md = require('markdown-it')('default', {
-        html: true,
-        breaks: true,
-        highlight: function (str, lang) {
-            if (lang && hljs.getLanguage(lang)) {
-              try {
-                return hljs.highlight(lang, str, true).value;
-              } catch (__) {}
-            }
-        
-            return ''; // 使用额外的默认转义
-        }
+var loaderUtils = require('loader-utils')
+var hljs = require('highlight.js')
+var cheerio = require('cheerio')
+var MarkdownIt = require('markdown-it')
+var fs = require("fs")
+module.exports = function (src) {
+  const options = loaderUtils.getOptions(this)
+  var renderVueTemplate = function(html, wrapper) {
+    var $ = cheerio.load(html, {
+      decodeEntities: false,
+      lowerCaseAttributeNames: false,
+      lowerCaseTags: false,
+      xmlMode: true,
     })
-    const fetch = (str, tag, scoped) => {
-        const $ = cheerio.load(str, {
-          decodeEntities: false,
-          xmlMode: true,
-        })
-        if (!tag) { return str }
-        if (tag === 'style') {
-          return scoped
-            ? $(`${tag}[scoped]`).html()
-            : $(`${tag}`).not(`${tag}[scoped]`).html()
+    var output = {
+      style: $.html('style'),
+      script: $.html($('script').first())
+    }
+    var result
+    $('style').remove()
+    $('script').remove()
+    if(wrapper) {
+      result = `<template><${wrapper}>` + $.html() + `</${wrapper}></template>\n`
+    } else {
+      result =`<template>` + $.html() + `</template>\n`
+    }
+    result += output.style + '\n' + output.script
+
+    return result
+  }
+  const Token = require('markdown-it/lib/token')
+  const fetch = (str, tag, scoped) => {
+    const $ = cheerio.load(str, {
+      decodeEntities: false,
+      xmlMode: true,
+    })
+    if (!tag) { return str }
+    if (tag === 'style') {
+      return scoped? $(`${tag}[scoped]`).html(): $(`${tag}`).not(`${tag}[scoped]`).html()
+    }
+    return $(tag).html()
+  }
+  const md = require('markdown-it')('default', {
+    html: true,
+    breaks: true,
+    highlight: renderHighlight,
+  })
+  const descriptionReg = new RegExp('<(description)(?:[^<]|<)+</\\1>', 'g')
+  md.core.ruler.push('update_template', function replace ({ tokens }) {
+    let description = ''
+    let template = ''
+    let script = ''
+    let style = ''
+    let scopedStyle = ''
+    let code = ''
+    let sourceCode = ''
+    tokens.forEach(token => {
+      if (token.type === 'html_block') {
+        if (token.content.match(descriptionReg)) {
+          description = fetch(token.content, 'description')
+          token.content = ''
         }
-        return $(tag).html()
       }
-
-    const descriptionReg = new RegExp('<(description)(?:[^<]|<)+</\\1>', 'g')
-    md.core.ruler.push('markdown_rule', function replace({ tokens }) {
-        //...
-        console.log('---tokens---',tokens)
-        let description
-        tokens.forEach(token => {
-            if (token.type === 'html_block') {
-                if (descriptionReg.test(token.content)) {
-                  description = fetch(token.content, 'description')
-                  console.log('---description---', description)
-                  token.content = ''
-                }
-            }
-            if(token.type === 'fence' && token.tag === 'code') {
-                description = fetch(token.content, 'description')
-            }
-        })
-    });
-
-
-    console.log(md.render(source))
-
-
-
-
-
-
-
-
-
-    return 'hello world'
+      if (token.type === 'fence' && token.info === 'html' && token.markup === '```') {
+        sourceCode = token.content
+        code = '````html\n' + token.content + '````'
+        template = fetch(token.content, 'template')
+        script = fetch(token.content, 'script')
+        style = fetch(token.content, 'style')
+        scopedStyle = fetch(token.content, 'style', true)
+        token.content = ''
+        token.type = 'html_block'
+      }
+    })
+    // if (template || description) {
+      // let jsfiddle = {
+      //   html: template,
+      //   script,
+      //   style,
+      //   description,
+      //   sourceCode,
+      // }
+      // jsfiddle = md.utils.escapeHtml(JSON.stringify(jsfiddle))
+      const codeHtml = code? md.render(code): ''
+      const descriptionHtml = description? md.render(description): ''
+      let newContent = `
+        <template>
+          <` + options.componentName +`>
+            <template slot="description">${descriptionHtml}</template>
+            <template slot="component">${template}</template>
+            <template slot="code">${codeHtml}</template>
+          </` + options.componentName + `>
+        </template>`
+      newContent += script? `<script>${script || ''}</script>`: ''
+      newContent += style? `<style lang="scss">${style || ''}</style>`: ''
+      newContent += scopedStyle? `<style scoped="scoped" lang="scss">${scopedStyle || ''}</style>`: ''
+      const t = new Token('html_block', '', 0)
+      t.content = newContent
+      tokens.push(t)
+    // }
+  })
+  var returns = renderVueTemplate(md.render(src), 'div')
+  fs.writeFile('returns.vue', returns, function () {})
+  return returns
+}
+/**
+ * `{{ }}` => `<span>{{</span> <span>}}</span>`
+ * @param  {string} str
+ * @return {string}
+ */
+var replaceDelimiters = function (str) {
+  return str.replace(/({{|}})/g, '<span>$1</span>')
+}
+var renderHighlight = function(str, lang) {
+  if (!(lang && hljs.getLanguage(lang))) {
+    return ''
+  }
+  return replaceDelimiters(hljs.highlight(lang, str, true).value)
 }

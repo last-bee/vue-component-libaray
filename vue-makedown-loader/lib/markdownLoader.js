@@ -4,7 +4,7 @@ var cheerio = require('cheerio')
 var MarkdownIt = require('markdown-it')
 var fs = require("fs")
 module.exports = function (src) {
-  // console.log('---src---', src)
+  console.log('---src---', src)
   // console.log('---this---', this)
   const options = loaderUtils.getOptions(this)
   // console.log('---options---', options)

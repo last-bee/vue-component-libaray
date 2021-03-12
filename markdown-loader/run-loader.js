@@ -3,10 +3,10 @@ const fs = require('fs')
 const path = require('path')
 
 runLoaders({
-    resource: path.join(__dirname, './demo.md'),
+    resource: path.join(__dirname, './src/demo.md'),
     loaders: [
         {
-            loader: path.join(__dirname, './main.js'),
+            loader: path.join(__dirname, './src/main.js'),
             options: {
                 componentName: 'test'
             }
